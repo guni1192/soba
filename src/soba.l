@@ -15,6 +15,8 @@ int yywrap(void) {
 "/"   return DIV;
 "%"   return SUR;
 "\n"  return LF;
+"and" return AND;
+"or"  return OR;
 
 [1-9][0-9]* {
     int temp;

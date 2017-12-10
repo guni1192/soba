@@ -12,8 +12,8 @@
 
 %token <int_value> INTEGER
 %token <double_value> FLOAT
-%token ADD SUB MUL DIV SUR LF
-%type <int_value> expr term primary_expr
+%token ADD SUB MUL DIV SUR LF AND OR XOR
+%type <int_value> expr term primary_expr logic
 
 %%
 line_list
@@ -21,7 +21,13 @@ line_list
     | line_list line
     ;
 line
-    : expr LF { printf("result: %d\n", $1); }
+    : logic LF { printf("-> %d\n", $1); }
+logic
+    : expr
+    | logic AND expr { $$ = $1 & $3; }
+    | logic OR  expr { $$ = $1 | $3; }
+    | logic XOR expr { $$ = $1 ^ $3; }
+    ;
 expr
     : term
     | expr ADD term { $$ = $1 + $3; }
