@@ -13,7 +13,7 @@
 %token <int_value> INTEGER
 %token <double_value> FLOAT
 %token ADD SUB MUL DIV SUR LF AND OR XOR
-%type <int_value> expr term primary_expr logic
+%type <double_value> block expr term number
 
 %%
 line_list
@@ -21,26 +21,25 @@ line_list
     | line_list line
     ;
 line
-    : logic LF { printf("-> %d\n", $1); }
-logic
-    : expr
-    | logic AND expr { $$ = $1 & $3; }
-    | logic OR  expr { $$ = $1 | $3; }
-    | logic XOR expr { $$ = $1 ^ $3; }
+    : block LF        { printf("-> %f\n", $1); }
+    ;
+block
+    :expr             { $$ = $1; }
     ;
 expr
-    : term
-    | expr ADD term { $$ = $1 + $3; }
-    | expr SUB term { $$ = $1 - $3; }
+    : term            { $$ = $1; }
+    | expr ADD term   { $$ = $1 + $3; }
+    | expr SUB term   { $$ = $1 - $3; }
     ;
 term
-    : primary_expr
-    | term MUL primary_expr { $$ = $1 * $3; }
-    | term DIV primary_expr { $$ = $1 / $3; }
-    | term SUR primary_expr { $$ = $1 % $3; }
+    : number          { $$ = $1; }
+    | term MUL number { $$ = $1 * $3; }
+    | term DIV number { $$ = $1 / $3; }
+    | term SUR number { $$ = (int)$1 % (int)$3; }
     ;
-primary_expr
-    : INTEGER
+number
+    : INTEGER         { $$ = (double)$1; }
+    | FLOAT           { $$ = $1; }
     ;
 %%
 
@@ -51,14 +50,18 @@ int yyerror(char const *str)
     return 0;
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
     extern int yyparse(void);
     extern FILE *yyin;
+    if ( argc < 2 ) { yyin = stdin; }
+    else            { yyin = fopen(argv[1], "r"); }
 
-    yyin = stdin;
-    if (yyparse()) {
-        fprintf(stderr, "Error Occured!\n");
-        exit(1);
-    }
+    do {
+        if (yyparse()) {
+            fprintf(stderr, "Error Occured!\n");
+            exit(1);
+        }
+    } while(!feof(yyin));
+
 }

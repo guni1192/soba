@@ -9,14 +9,16 @@ int yywrap(void) {
 %}
 
 %%
-"+"   return ADD;
-"-"   return SUB;
-"*"   return MUL;
-"/"   return DIV;
-"%"   return SUR;
-"\n"  return LF;
-"and" return AND;
-"or"  return OR;
+"+"       return ADD;
+"-"       return SUB;
+"*"       return MUL;
+"/"       return DIV;
+"%"       return SUR;
+"\n"      return LF;
+"and"     return AND;
+"or"      return OR;
+
+[ \t]+      {}
 
 [1-9][0-9]* {
     int temp;
@@ -32,4 +34,5 @@ int yywrap(void) {
     yylval.double_value = temp;
     return FLOAT;
 }
+
 %%
