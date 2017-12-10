@@ -37,7 +37,9 @@ int yywrap(void) {
 }
 
 [a-zA-Z_]+ {
-    yylval.char_value = yytext;
+    char *temp;
+    sscanf(yytext, "%s", temp);
+    yylval.char_value = temp;
     return(VAR);
 }
 

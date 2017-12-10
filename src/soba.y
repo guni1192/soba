@@ -13,8 +13,8 @@ typedef struct {
 } variable;
 
 double get_value(char *name);
-
-variable var[VARSIZE];
+int var_used = 0;
+variable var[VARSIZE] = {NULL, 0};
 
 %}
 
@@ -61,17 +61,34 @@ number
     ;
 %%
 
+int search_variable(char *name) {
+    for ( int i = 0; i <= var_used; i++ ) {
+        puts("yet");
+        if ( !strcmp(var[i].name, name) ) { return i; }
+    }
+    return -1;
+}
+
 int substitution(char *name, double value)
 {
-    strcpy(var[0].name, name);
-    var[0].value = value;
+    int i = search_variable(name);
+    if ( i == -1 ) {
+        strcpy(var[var_used].name, name);
+        var[var_used].value = value;
+        var_used++;
+    }
+    else {
+        var[i].value = value;
+    }
     return 0;
 }
 
 double get_value(char *name)
 {
-    printf("%s = ", name);
-    return var[0].value;
+    int i = search_variable(name);
+    if ( i != -1 ) { return var[i].value; }
+    printf("%s is not definded\n", name);
+    return 0.0;
 }
 
 int yyerror(char const *str)
@@ -94,7 +111,6 @@ int main(int argc, char* argv[])
             exit(1);
         }
     } while(!feof(yyin));
-
 }
 
 
