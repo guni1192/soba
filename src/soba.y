@@ -1,18 +1,34 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define YYDEBUG 1
+
+#define VARSIZE 64
+#define VARNAMESIZE 64
+
+typedef struct {
+    char name[VARNAMESIZE];
+    double value;
+} variable;
+
+double get_value(char *name);
+
+variable var[VARSIZE];
+
 %}
 
 %union {
     int          int_value;
     double       double_value;
+    char         *char_value;
 }
 
 
 %token <int_value> INTEGER
 %token <double_value> FLOAT
-%token ADD SUB MUL DIV SUR LF AND OR XOR
+%token <char_value> VAR
+%token ADD SUB MUL DIV SUR LF AND OR XOR EQU
 %type <double_value> block expr term number
 
 %%
@@ -21,13 +37,14 @@ line_list
     | line_list line
     ;
 line
-    : block LF        { printf("-> %f\n", $1); }
+    : block LF        { printf("%f\n", $1); }
     ;
 block
-    :expr             { $$ = $1; }
+    : expr            { $$ = $1; }
     ;
 expr
     : term            { $$ = $1; }
+    | VAR EQU expr    { substitution($1, $3); $$ = $3; }
     | expr ADD term   { $$ = $1 + $3; }
     | expr SUB term   { $$ = $1 - $3; }
     ;
@@ -40,8 +57,22 @@ term
 number
     : INTEGER         { $$ = (double)$1; }
     | FLOAT           { $$ = $1; }
+    | VAR             { $$ = get_value($1); }
     ;
 %%
+
+int substitution(char *name, double value)
+{
+    strcpy(var[0].name, name);
+    var[0].value = value;
+    return 0;
+}
+
+double get_value(char *name)
+{
+    printf("%s = ", name);
+    return var[0].value;
+}
 
 int yyerror(char const *str)
 {
@@ -65,3 +96,5 @@ int main(int argc, char* argv[])
     } while(!feof(yyin));
 
 }
+
+

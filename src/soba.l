@@ -14,6 +14,7 @@ int yywrap(void) {
 "*"       return MUL;
 "/"       return DIV;
 "%"       return SUR;
+"="       return EQU;
 "\n"      return LF;
 "and"     return AND;
 "or"      return OR;
@@ -33,6 +34,11 @@ int yywrap(void) {
     sscanf(yytext, "%lf", &temp);
     yylval.double_value = temp;
     return FLOAT;
+}
+
+[a-zA-Z_]+ {
+    yylval.char_value = yytext;
+    return(VAR);
 }
 
 %%
