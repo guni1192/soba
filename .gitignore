@@ -1,0 +1,5 @@
+soba.tab.c
+soba.tab.h
+lex.yy.c
+documents/
+bin/soba
