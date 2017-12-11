@@ -14,7 +14,7 @@ typedef struct {
 
 double get_value(char *name);
 int var_used = 0;
-variable var[VARSIZE] = {NULL, 0};
+variable var[VARSIZE];
 
 %}
 
@@ -37,14 +37,14 @@ line_list
     | line_list line
     ;
 line
-    : block LF        { printf("%f\n", $1); }
+    : block LF        { printf("%f\n", $1);}
     ;
 block
     : expr            { $$ = $1; }
     ;
 expr
     : term            { $$ = $1; }
-    | VAR EQU expr    { substitution($1, $3); $$ = $3; }
+    | VAR EQU number  { substitution($1, $3); $$ = $3; }
     | expr ADD term   { $$ = $1 + $3; }
     | expr SUB term   { $$ = $1 - $3; }
     ;
@@ -62,8 +62,7 @@ number
 %%
 
 int search_variable(char *name) {
-    for ( int i = 0; i <= var_used; i++ ) {
-        puts("yet");
+    for ( int i = 0; i < var_used; i++ ) {
         if ( !strcmp(var[i].name, name) ) { return i; }
     }
     return -1;
@@ -77,9 +76,7 @@ int substitution(char *name, double value)
         var[var_used].value = value;
         var_used++;
     }
-    else {
-        var[i].value = value;
-    }
+    else { var[i].value = value; }
     return 0;
 }
 
@@ -112,5 +109,3 @@ int main(int argc, char* argv[])
         }
     } while(!feof(yyin));
 }
-
-

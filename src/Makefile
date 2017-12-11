@@ -13,4 +13,4 @@ soba: lex.yy.c soba.tab.c soba.tab.h
 	$(CC) -o ../bin/soba soba.tab.c lex.yy.c
 
 clean:
-	rm soba soba.tab.c lex.yy.c soba.tab.h
+	rm ../bin/soba soba.tab.c lex.yy.c soba.tab.h

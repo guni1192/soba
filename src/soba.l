@@ -9,6 +9,9 @@ int yywrap(void) {
 %}
 
 %%
+
+"udon" { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
+
 "+"       return ADD;
 "-"       return SUB;
 "*"       return MUL;
@@ -42,5 +45,8 @@ int yywrap(void) {
     yylval.char_value = temp;
     return(VAR);
 }
+
+
+. { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
 
 %%
