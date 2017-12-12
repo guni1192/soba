@@ -22,16 +22,16 @@ int substitution(char *name, double value);
 %union {
     int          int_value;
     double       double_value;
-    char         char_value[255];
+    char         *string;
 }
 
 
 %token <int_value> INTEGER
 %token <double_value> FLOAT
-%token <char_value> VAR STR
+%token <string> VAR STR
 %token LF AND OR XOR IF PRINT PRINTLN
 %type <double_value> block expr term number if_statement
-%type <char_value> string
+%type <string> string
 %start program
 
 %%
@@ -39,18 +39,18 @@ program
     :
     | PRINT block LF    { printf("%f", $2); }
     | PRINTLN block LF  { printf("%f\n", $2); }
-    | program PRINT block LF    { printf("%f", $3); }
-    | program PRINTLN block LF  { printf("%f\n", $3); }
-    | block ':'         { printf("--> %f\n", $1);}
-    | block LF          { printf("--> %f\n", $1);}
-    | program block LF  { printf("--> %f\n", $2);}
     | PRINT string LF   { printf("%s", $2); }
     | PRINTLN string LF { printf("%s\n", $2); }
+    | program PRINT block LF    { printf("%f", $3); }
+    | program PRINTLN block LF  { printf("%f\n", $3); }
     | program PRINT string LF   { printf("%s", $3); }
     | program PRINTLN string LF { printf("%s\n", $3); }
+    | program block LF  { printf("--> %f\n", $2);}
+    | string LF         { printf("--> %s\n", $1); }
+    | block LF          { printf("--> %f\n", $1);}
     ;
 string
-    : '"' STR '"'     { puts("Here!!"); strcpy($$, $2); }
+    : STR               { $$ = $1; }
     ;
 block
     : expr            { $$ = $1; }
@@ -60,7 +60,7 @@ block
 if_statement
     : IF expr ':' expr    { if ( $2 != 0 ) $$ = $4;
                             else $$ = 0; }
-    | expr IF expr        { if ( $3 != 0 ) $$ = $1;
+    | block IF expr        { if ( $3 != 0 ) $$ = $1;
                             else $$ = 0; }
     ;
 expr
