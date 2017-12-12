@@ -14,7 +14,6 @@ int yywrap(void) {
 "udon" { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
 
 [+\-*/%=<>:;]  {
-    printf("match word is %s\n", yytext);
     return yytext[0];
 }
 
@@ -39,7 +38,7 @@ int yywrap(void) {
     return RANGE;
 }
 
-[1-9][0-9]* {
+[1-9]?[0-9]* {
     int temp;
     // 入力から実数を取得
     sscanf(yytext, "%d", &temp);

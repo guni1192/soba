@@ -30,24 +30,24 @@ int substitution(char *name, double value);
 %token <double_value> FLOAT
 %token <string> VAR STR RANGE
 %token LF IF PRINT PRINTLN FOR IN
-%type <double_value> block expr term number if_stmt
+%type <int_value> block expr term number if_stmt
 %type <string> string
 %start program
 
 %%
 program
     :
-    | PRINT block LF    { printf("%f", $2); }
-    | PRINTLN block LF  { printf("%f\n", $2); }
+    | PRINT block LF    { printf("%d", $2); }
+    | PRINTLN block LF  { printf("%d\n", $2); }
     | PRINT string LF   { printf("%s", $2); }
     | PRINTLN string LF { printf("%s\n", $2); }
     | program PRINT block LF    { printf("%f", $3); }
-    | program PRINTLN block LF  { printf("%f\n", $3); }
+    | program PRINTLN block LF  { printf("%d\n", $3); }
     | program PRINT string LF   { printf("%s", $3); }
     | program PRINTLN string LF { printf("%s\n", $3); }
-    | program block LF  { printf("--> %f\n", $2);}
+    | program block LF  { printf("--> %d\n", $2);}
     | string LF         { printf("--> %s\n", $1); }
-    | block LF          { printf("--> %f\n", $1);}
+    | block LF          { printf("--> %d\n", $1);}
     ;
 string
     : STR               { $$ = $1; }
@@ -58,10 +58,10 @@ block
     | if_stmt         { $$ = $1; }
     ;
 if_stmt
-    : IF expr ':' block     { if ( $2 != 0 ) $$ = $4;
-                              else $$ = 0; }
-    | block IF expr         { if ( $3 != 0 ) $$ = $1;
-                              else $$ = 0; }
+    : IF expr ':' block { if ( $2 != 0 ) $$ = $4;
+                          else $$ = 0; }
+    | block IF block    { if ( $3 != 0 ) $$ = $3;
+                          else $$ = 0; }
     ;
 
 expr
