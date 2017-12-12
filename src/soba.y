@@ -30,9 +30,12 @@ int substitution(char *name, double value);
 %token <double_value> FLOAT
 %token <string> VAR STR RANGE
 %token LF IF PRINT PRINTLN FOR IN
-%type <int_value> block expr term number if_stmt
+%type <int_value> block expr number if_stmt
 %type <string> string
 %start program
+
+%left '+' '-'
+%left '*' '/' '%'
 
 %%
 program
@@ -65,15 +68,12 @@ if_stmt
     ;
 
 expr
-    : term              { $$ = $1; }
-    | expr '+' term     { $$ = $1 + $3; }
-    | expr '-' term     { $$ = $1 - $3; }
-    ;
-term
-    : number          { $$ = $1; }
-    | term '*' number { $$ = $1 * $3; }
-    | term '/' number { $$ = $1 / $3; }
-    | term '%' number { $$ = (int)$1 % (int)$3; }
+    : number            { $$ = $1; }
+    | expr '+' expr { $$ = $1 + $3; }
+    | expr '-' expr { $$ = $1 - $3; }
+    | expr '*' expr { $$ = $1 * $3; }
+    | expr '/' expr { $$ = $1 / $3; }
+    | expr '%' expr { $$ = $1 % $3; }
     ;
 number
     : INTEGER         { $$ = (double)$1; }
