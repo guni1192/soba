@@ -24,6 +24,8 @@ and       return AND;
 or        return OR;
 "if"      return IF;
 ":"       return COLON;
+"print"     return PRINT;
+"println"   return PRINTLN;
 
 [ \t]+      {}
 
