@@ -29,8 +29,8 @@ int substitution(char *name, double value);
 %token <int_value> INTEGER
 %token <double_value> FLOAT
 %token <char_value> VAR
-%token ADD SUB MUL DIV SUR LF AND OR XOR EQU
-%type <double_value> block expr term number
+%token ADD SUB MUL DIV SUR LF AND OR XOR EQU IF COLON
+%type <double_value> block expr term number if_statement
 %start program
 
 %%
@@ -43,7 +43,15 @@ program
 block
     : expr            { $$ = $1; }
     | VAR EQU expr    { substitution($1, $3); $$ = $3; }
+    | if_statement    { $$ = $1; }
     ;
+if_statement
+    : IF expr COLON expr  { if ( $2 != 0 ) $$ = $4;
+                            else $$ = 0; }
+    | expr IF expr        { if ( $3 != 0 ) $$ = $1;
+                            else $$ = 0; }
+    ;
+
 expr
     : term            { $$ = $1; }
     | expr ADD term   { $$ = $1 + $3; }
