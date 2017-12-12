@@ -68,11 +68,17 @@ if_stmt
     ;
 
 expr
-    : number            { $$ = $1; }
+    : number        { $$ = $1; }
     | expr '+' expr { $$ = $1 + $3; }
     | expr '-' expr { $$ = $1 - $3; }
     | expr '*' expr { $$ = $1 * $3; }
-    | expr '/' expr { $$ = $1 / $3; }
+    | expr '/' expr { 
+          if ( $3 != 0 ){ $$ = $1 / $3; }
+          else {
+              fprintf(stderr, "Zero divide error!!\n"); 
+              $$ = -1;
+          }
+      }
     | expr '%' expr { $$ = $1 % $3; }
     ;
 number
