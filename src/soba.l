@@ -13,21 +13,20 @@ int yywrap(void) {
 
 "udon" { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
 
-"+"       return ADD;
-"-"       return SUB;
-"*"       return MUL;
-"/"       return DIV;
-"%"       return SUR;
-"="       return EQU;
-"\n"      return LF;
-and       return AND;
-or        return OR;
-"if"      return IF;
-":"       return COLON;
-"print"     return PRINT;
-"println"   return PRINTLN;
+[+\-*/%=<>:;\"]  {
+    printf("match word is %s\n", yytext);
+    return yytext[0];
+}
 
-[ \t]+      {}
+"\n"             return LF;
+"and"            return AND;
+"or"             return OR;
+"if"             return IF;
+"print"          return PRINT;
+"println"        return PRINTLN;
+
+[ \t] {}
+
 
 [1-9][0-9]* {
     int temp;
@@ -44,12 +43,14 @@ or        return OR;
     return FLOAT;
 }
 
+
 [a-zA-Z_]+ {
     char temp[255];
     sscanf(yytext, "%s", temp);
     strcpy(yylval.char_value, temp);
     return(VAR);
 }
+
 
 
 . { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
