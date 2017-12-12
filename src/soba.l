@@ -19,8 +19,6 @@ int yywrap(void) {
 }
 
 "\n"             return LF;
-"and"            return AND;
-"or"             return OR;
 "if"             return IF;
 "print"          return PRINT;
 "println"        return PRINTLN;

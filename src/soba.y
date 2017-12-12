@@ -4,11 +4,11 @@
 #include <string.h>
 #define YYDEBUG 1
 
-#define VARSIZE 64
-#define VARNAMESIZE 64
+#define VARSIZE 255
+#define VARNAMESIZE 255
 
 typedef struct {
-    char name[VARNAMESIZE];
+    char *name;
     double value;
 } variable;
 
@@ -29,7 +29,7 @@ int substitution(char *name, double value);
 %token <int_value> INTEGER
 %token <double_value> FLOAT
 %token <string> VAR STR
-%token LF AND OR XOR IF PRINT PRINTLN
+%token LF IF PRINT PRINTLN
 %type <double_value> block expr term number if_statement
 %type <string> string
 %start program
@@ -58,15 +58,15 @@ block
     | if_statement    { $$ = $1; }
     ;
 if_statement
-    : IF expr ':' expr    { if ( $2 != 0 ) $$ = $4;
-                            else $$ = 0; }
-    | block IF expr        { if ( $3 != 0 ) $$ = $1;
-                            else $$ = 0; }
+    : IF expr ':' block     { if ( $2 != 0 ) $$ = $4;
+                              else $$ = 0; }
+    | block IF expr         { if ( $3 != 0 ) $$ = $1;
+                              else $$ = 0; }
     ;
 expr
-    : term            { $$ = $1; }
-    | expr '+' term   { $$ = $1 + $3; }
-    | expr '-' term   { $$ = $1 - $3; }
+    : term              { $$ = $1; }
+    | expr '+' term     { $$ = $1 + $3; }
+    | expr '-' term     { $$ = $1 - $3; }
     ;
 term
     : number          { $$ = $1; }
@@ -92,7 +92,7 @@ int substitution(char *name, double value)
 {
     int i = search_variable(name);
     if ( i == -1 ) {
-        strcpy(var[var_used].name, name);
+        var[var_used].name = strdup(name);
         var[var_used].value = value;
         var_used++;
     }
