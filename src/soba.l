@@ -20,8 +20,12 @@ int yywrap(void) {
 "%"       return SUR;
 "="       return EQU;
 "\n"      return LF;
-"and"     return AND;
-"or"      return OR;
+and       return AND;
+or        return OR;
+"if"      return IF;
+":"       return COLON;
+"print"     return PRINT;
+"println"   return PRINTLN;
 
 [ \t]+      {}
 

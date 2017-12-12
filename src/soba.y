@@ -29,13 +29,17 @@ int substitution(char *name, double value);
 %token <int_value> INTEGER
 %token <double_value> FLOAT
 %token <char_value> VAR
-%token ADD SUB MUL DIV SUR LF AND OR XOR EQU
-%type <double_value> block expr term number
+%token ADD SUB MUL DIV SUR LF AND OR XOR EQU IF COLON PRINT PRINTLN
+%type <double_value> block expr term number if_statement
 %start program
 
 %%
 program
     :
+    | PRINT block LF    { printf("%f", $2); }
+    | PRINTLN block LF  { printf("%f\n", $2); }
+    | program PRINT block LF    { printf("%f", $3); }
+    | program PRINTLN block LF  { printf("%f\n", $3); }
     | block ';'         { printf("--> %f\n", $1);}
     | block LF          { printf("--> %f\n", $1);}
     | program block LF  { printf("--> %f\n", $2);}
@@ -43,6 +47,13 @@ program
 block
     : expr            { $$ = $1; }
     | VAR EQU expr    { substitution($1, $3); $$ = $3; }
+    | if_statement    { $$ = $1; }
+    ;
+if_statement
+    : IF expr COLON expr  { if ( $2 != 0 ) $$ = $4;
+                            else $$ = 0; }
+    | expr IF expr        { if ( $3 != 0 ) $$ = $1;
+                            else $$ = 0; }
     ;
 expr
     : term            { $$ = $1; }
