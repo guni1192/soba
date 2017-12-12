@@ -28,9 +28,10 @@ int substitution(char *name, double value);
 
 %token <int_value> INTEGER
 %token <double_value> FLOAT
-%token <char_value> VAR
-%token ADD SUB MUL DIV SUR LF AND OR XOR EQU IF COLON PRINT PRINTLN
+%token <char_value> VAR STR
+%token LF AND OR XOR IF PRINT PRINTLN
 %type <double_value> block expr term number if_statement
+%type <char_value> string
 %start program
 
 %%
@@ -40,31 +41,38 @@ program
     | PRINTLN block LF  { printf("%f\n", $2); }
     | program PRINT block LF    { printf("%f", $3); }
     | program PRINTLN block LF  { printf("%f\n", $3); }
-    | block ';'         { printf("--> %f\n", $1);}
+    | block ':'         { printf("--> %f\n", $1);}
     | block LF          { printf("--> %f\n", $1);}
     | program block LF  { printf("--> %f\n", $2);}
+    | PRINT string LF   { printf("%s", $2); }
+    | PRINTLN string LF { printf("%s\n", $2); }
+    | program PRINT string LF   { printf("%s", $3); }
+    | program PRINTLN string LF { printf("%s\n", $3); }
+    ;
+string
+    : '"' STR '"'     { puts("Here!!"); strcpy($$, $2); }
     ;
 block
     : expr            { $$ = $1; }
-    | VAR EQU expr    { substitution($1, $3); $$ = $3; }
+    | VAR '=' expr    { substitution($1, $3); $$ = $3; }
     | if_statement    { $$ = $1; }
     ;
 if_statement
-    : IF expr COLON expr  { if ( $2 != 0 ) $$ = $4;
+    : IF expr ':' expr    { if ( $2 != 0 ) $$ = $4;
                             else $$ = 0; }
     | expr IF expr        { if ( $3 != 0 ) $$ = $1;
                             else $$ = 0; }
     ;
 expr
     : term            { $$ = $1; }
-    | expr ADD term   { $$ = $1 + $3; }
-    | expr SUB term   { $$ = $1 - $3; }
+    | expr '+' term   { $$ = $1 + $3; }
+    | expr '-' term   { $$ = $1 - $3; }
     ;
 term
     : number          { $$ = $1; }
-    | term MUL number { $$ = $1 * $3; }
-    | term DIV number { $$ = $1 / $3; }
-    | term SUR number { $$ = (int)$1 % (int)$3; }
+    | term '*' number { $$ = $1 * $3; }
+    | term '/' number { $$ = $1 / $3; }
+    | term '%' number { $$ = (int)$1 % (int)$3; }
     ;
 number
     : INTEGER         { $$ = (double)$1; }
