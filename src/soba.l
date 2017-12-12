@@ -18,10 +18,12 @@ int yywrap(void) {
     return yytext[0];
 }
 
-"\n"             return LF;
-"if"             return IF;
-"print"          return PRINT;
-"println"        return PRINTLN;
+"\n"              return LF;
+"if"              return IF;
+"for"             return FOR;
+"in"              return IN;
+"print"           return PRINT;
+"println"         return PRINTLN;
 
 [ \t]+ {}
 
@@ -30,6 +32,11 @@ int yywrap(void) {
   yylval.string = strdup(&yytext[1]);
   printf("%s\n", yylval.string);
   return STR;
+}
+
+[1-9][0-9]\.\.[1-9][0-9] {
+    yylval.string = strdup(yytext);
+    return RANGE;
 }
 
 [1-9][0-9]* {

@@ -28,9 +28,9 @@ int substitution(char *name, double value);
 
 %token <int_value> INTEGER
 %token <double_value> FLOAT
-%token <string> VAR STR
-%token LF IF PRINT PRINTLN
-%type <double_value> block expr term number if_statement
+%token <string> VAR STR RANGE
+%token LF IF PRINT PRINTLN FOR IN
+%type <double_value> block expr term number if_stmt
 %type <string> string
 %start program
 
@@ -55,14 +55,15 @@ string
 block
     : expr            { $$ = $1; }
     | VAR '=' expr    { substitution($1, $3); $$ = $3; }
-    | if_statement    { $$ = $1; }
+    | if_stmt         { $$ = $1; }
     ;
-if_statement
+if_stmt
     : IF expr ':' block     { if ( $2 != 0 ) $$ = $4;
                               else $$ = 0; }
     | block IF expr         { if ( $3 != 0 ) $$ = $1;
                               else $$ = 0; }
     ;
+
 expr
     : term              { $$ = $1; }
     | expr '+' term     { $$ = $1 + $3; }
@@ -99,6 +100,7 @@ int substitution(char *name, double value)
     else { var[i].value = value; }
     return 0;
 }
+
 
 double get_value(char *name)
 {
