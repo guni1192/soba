@@ -1,6 +1,7 @@
 /* 定義部 */
 %{
 #include <stdio.h>
+#include <string.h>
 #include "soba.tab.h"
 
 int yywrap(void) {
@@ -40,9 +41,9 @@ int yywrap(void) {
 }
 
 [a-zA-Z_]+ {
-    char *temp;
+    char temp[255];
     sscanf(yytext, "%s", temp);
-    yylval.char_value = temp;
+    strcpy(yylval.char_value, temp);
     return(VAR);
 }
 

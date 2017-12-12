@@ -12,16 +12,17 @@ typedef struct {
     double value;
 } variable;
 
-double get_value(char *name);
 int var_used = 0;
 variable var[VARSIZE];
+double get_value(char *name);
+int substitution(char *name, double value);
 
 %}
 
 %union {
     int          int_value;
     double       double_value;
-    char         *char_value;
+    char         char_value[255];
 }
 
 
@@ -30,21 +31,21 @@ variable var[VARSIZE];
 %token <char_value> VAR
 %token ADD SUB MUL DIV SUR LF AND OR XOR EQU
 %type <double_value> block expr term number
+%start program
 
 %%
-line_list
-    : line
-    | line_list line
-    ;
-line
-    : block LF        { printf("%f\n", $1);}
+program
+    :
+    | block ';'         { printf("--> %f\n", $1);}
+    | block LF          { printf("--> %f\n", $1);}
+    | program block LF  { printf("--> %f\n", $2);}
     ;
 block
     : expr            { $$ = $1; }
+    | VAR EQU expr    { substitution($1, $3); $$ = $3; }
     ;
 expr
     : term            { $$ = $1; }
-    | VAR EQU number  { substitution($1, $3); $$ = $3; }
     | expr ADD term   { $$ = $1 + $3; }
     | expr SUB term   { $$ = $1 - $3; }
     ;
