@@ -1,6 +1,7 @@
 /* 定義部 */
 %{
 #include <stdio.h>
+#include <string.h>
 #include "soba.tab.h"
 
 int yywrap(void) {
@@ -9,6 +10,9 @@ int yywrap(void) {
 %}
 
 %%
+
+"udon" { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
+
 "+"       return ADD;
 "-"       return SUB;
 "*"       return MUL;
@@ -37,8 +41,13 @@ int yywrap(void) {
 }
 
 [a-zA-Z_]+ {
-    yylval.char_value = yytext;
+    char temp[255];
+    sscanf(yytext, "%s", temp);
+    strcpy(yylval.char_value, temp);
     return(VAR);
 }
+
+
+. { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
 
 %%
