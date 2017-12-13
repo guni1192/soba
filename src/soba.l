@@ -13,10 +13,6 @@ int yywrap(void) {
 
 "udon" { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
 
-[+\-*/%=<>:;]  {
-    return yytext[0];
-}
-
 "\n"              return LF;
 "if"              return IF;
 "for"             return FOR;
@@ -25,6 +21,21 @@ int yywrap(void) {
 "false"           return FALSE;
 "print"           return PRINT;
 "println"         return PRINTLN;
+
+"+"               return op_plus;
+"-"               return op_minus;
+"*"               return op_mult;
+"/"               return op_div;
+"%"               return op_mod;
+"="               return op_eq;
+"=="              return op_eqeq;
+"!="              return op_nep;
+"<"               return op_lt;
+"<="              return op_le;
+">"               return op_gt;
+">="              return op_ge;
+":"               return op_colon;
+";"               return op_scolon;
 
 [ \t]+ {}
 

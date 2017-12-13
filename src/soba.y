@@ -27,13 +27,37 @@ int substitution(char *name, double value);
 %token <int_value> INTEGER
 %token <double_value> FLOAT
 %token <string> VAR STR RANGE
-%token LF IF PRINT PRINTLN FOR IN TRUE FALSE
+%token
+  LF
+  PRINT
+  PRINTLN
+  IF
+  FOR
+  IN
+  TRUE
+  FALSE
+  op_plus
+  op_minus
+  op_mult
+  op_div
+  op_mod
+  op_eq
+  op_eqeq
+  op_neq
+  op_lt
+  op_le
+  op_gt
+  op_ge
+  op_colon
+  op_scolon
 %type <int_value> block expr number if_stmt_num
+
 %type <string> string
 %start program
 
-%left '+' '-'
-%left '*' '/' '%'
+%left op_eqeq op_nep op_lt op_le op_gt op_ge
+%left op_plus op_minus
+%left op_mult op_div op_mod
 
 %%
 program
@@ -51,26 +75,32 @@ block
     | if_stmt_num       { $$ = $1; }
     ;
 if_stmt_num
-    : IF expr ':' block { if ( $2 != 0 ) $$ = $4;
+    : IF expr op_colon block { if ( $2 != 0 ) $$ = $4;
                           else $$ = 0; }
     | block IF expr     { if ( $3 != 0 ) $$ = $3;
                           else $$ = 0; }
     ;
 
 expr
-    : number            { $$ = $1; }
-    | VAR '=' expr      { substitution($1, $3); $$ = $3; }
-    | expr '+' expr     { $$ = $1 + $3; }
-    | expr '-' expr     { $$ = $1 - $3; }
-    | expr '*' expr     { $$ = $1 * $3; }
-    | expr '/' expr     {
+    : number                { $$ = $1; }
+    | VAR op_eq expr        { substitution($1, $3); $$ = $3; }
+    | expr op_eqeq expr     { $$ = $1 == $3; }
+    | expr op_neq expr      { $$ = $1 != $3; }
+    | expr op_lt expr       { $$ = $1 < $3; }
+    | expr op_le expr       { $$ = $1 <= $3; }
+    | expr op_gt expr       { $$ = $1 > $3; }
+    | expr op_ge expr       { $$ = $1 >= $3; }
+    | expr op_plus expr     { $$ = $1 + $3; }
+    | expr op_minus expr    { $$ = $1 - $3; }
+    | expr op_mult expr     { $$ = $1 * $3; }
+    | expr op_div expr      {
           if ( $3 != 0 ){ $$ = $1 / $3; }
           else {
               fprintf(stderr, "Zero divide error!!\n"); 
               $$ = -1;
           }
       }
-    | expr '%' expr     { $$ = $1 % $3; }
+    | expr op_mod expr     { $$ = $1 % $3; }
     ;
 number
     : INTEGER           { $$ = (double)$1; }
