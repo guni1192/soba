@@ -21,6 +21,8 @@ int yywrap(void) {
 "if"              return IF;
 "for"             return FOR;
 "in"              return IN;
+"true"            return TRUE;
+"false"           return FALSE;
 "print"           return PRINT;
 "println"         return PRINTLN;
 

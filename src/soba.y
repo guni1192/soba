@@ -27,7 +27,7 @@ int substitution(char *name, double value);
 %token <int_value> INTEGER
 %token <double_value> FLOAT
 %token <string> VAR STR RANGE
-%token LF IF PRINT PRINTLN FOR IN
+%token LF IF PRINT PRINTLN FOR IN TRUE FALSE
 %type <int_value> block expr number if_stmt_num
 %type <string> string
 %start program
@@ -50,7 +50,6 @@ block
     : expr              { $$ = $1; }
     | if_stmt_num       { $$ = $1; }
     ;
-
 if_stmt_num
     : IF expr ':' block { if ( $2 != 0 ) $$ = $4;
                           else $$ = 0; }
@@ -77,6 +76,8 @@ number
     : INTEGER           { $$ = (double)$1; }
     | FLOAT             { $$ = $1; }
     | VAR               { $$ = get_value($1); }
+    | TRUE              { $$ = 1; }
+    | FALSE             { $$ = 0; }
     ;
 %%
 
