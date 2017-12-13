@@ -28,8 +28,8 @@ int yywrap(void) {
 
 \".*\" {
   yytext[strlen(yytext)-1] = '\0';
-  yylval.string = strdup(&yytext[1]);
-  printf("%s\n", yylval.string);
+  yytext = &yytext[1];
+  yylval.string = strdup(yytext);
   return STR;
 }
 
@@ -58,8 +58,6 @@ int yywrap(void) {
     yylval.string = strdup(yytext);
     return(VAR);
 }
-
-
 
 . { fprintf(stderr, "Syntax Error: %s\n", yytext); exit(1); }
 

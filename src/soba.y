@@ -5,7 +5,6 @@
 #define YYDEBUG 1
 
 #define VARSIZE 255
-#define VARNAMESIZE 255
 
 typedef struct {
     char *name;
@@ -17,8 +16,7 @@ variable var[VARSIZE];
 double get_value(char *name);
 int substitution(char *name, double value);
 
-%}
-
+%} 
 %union {
     int          int_value;
     double       double_value;
@@ -30,7 +28,7 @@ int substitution(char *name, double value);
 %token <double_value> FLOAT
 %token <string> VAR STR RANGE
 %token LF IF PRINT PRINTLN FOR IN
-%type <int_value> block expr number if_stmt
+%type <int_value> block expr number if_stmt_num
 %type <string> string
 %start program
 
@@ -40,51 +38,45 @@ int substitution(char *name, double value);
 %%
 program
     :
-    | PRINT block LF    { printf("%d", $2); }
-    | PRINTLN block LF  { printf("%d\n", $2); }
-    | PRINT string LF   { printf("%s", $2); }
-    | PRINTLN string LF { printf("%s\n", $2); }
-    | program PRINT block LF    { printf("%f", $3); }
-    | program PRINTLN block LF  { printf("%d\n", $3); }
-    | program PRINT string LF   { printf("%s", $3); }
-    | program PRINTLN string LF { printf("%s\n", $3); }
-    | program block LF  { printf("--> %d\n", $2);}
+    | block LF          { printf("--> %d\n", $1); }
     | string LF         { printf("--> %s\n", $1); }
-    | block LF          { printf("--> %d\n", $1);}
+    | program block LF  { printf("--> %d\n", $2); }
+    | program string LF { printf("--> %s\n", $2); }
     ;
 string
     : STR               { $$ = $1; }
     ;
 block
-    : expr            { $$ = $1; }
-    | VAR '=' expr    { substitution($1, $3); $$ = $3; }
-    | if_stmt         { $$ = $1; }
+    : expr              { $$ = $1; }
+    | if_stmt_num       { $$ = $1; }
     ;
-if_stmt
+
+if_stmt_num
     : IF expr ':' block { if ( $2 != 0 ) $$ = $4;
                           else $$ = 0; }
-    | block IF block    { if ( $3 != 0 ) $$ = $3;
+    | block IF expr     { if ( $3 != 0 ) $$ = $3;
                           else $$ = 0; }
     ;
 
 expr
-    : number        { $$ = $1; }
-    | expr '+' expr { $$ = $1 + $3; }
-    | expr '-' expr { $$ = $1 - $3; }
-    | expr '*' expr { $$ = $1 * $3; }
-    | expr '/' expr { 
+    : number            { $$ = $1; }
+    | VAR '=' expr      { substitution($1, $3); $$ = $3; }
+    | expr '+' expr     { $$ = $1 + $3; }
+    | expr '-' expr     { $$ = $1 - $3; }
+    | expr '*' expr     { $$ = $1 * $3; }
+    | expr '/' expr     {
           if ( $3 != 0 ){ $$ = $1 / $3; }
           else {
               fprintf(stderr, "Zero divide error!!\n"); 
               $$ = -1;
           }
       }
-    | expr '%' expr { $$ = $1 % $3; }
+    | expr '%' expr     { $$ = $1 % $3; }
     ;
 number
-    : INTEGER         { $$ = (double)$1; }
-    | FLOAT           { $$ = $1; }
-    | VAR             { $$ = get_value($1); }
+    : INTEGER           { $$ = (double)$1; }
+    | FLOAT             { $$ = $1; }
+    | VAR               { $$ = get_value($1); }
     ;
 %%
 
