@@ -21,12 +21,15 @@ int yywrap(void) {
 "false"           return FALSE;
 "print"           return PRINT;
 "println"         return PRINTLN;
-
 "+"               return op_plus;
 "-"               return op_minus;
 "*"               return op_mult;
 "/"               return op_div;
 "%"               return op_mod;
+"+="              return op_pleq;
+"-="              return op_mieq;
+"*="              return op_mueq;
+"/="              return op_dieq;
 "="               return op_eq;
 "=="              return op_eqeq;
 "!="              return op_nep;
@@ -65,7 +68,6 @@ int yywrap(void) {
     yylval.double_value = temp;
     return FLOAT;
 }
-
 
 [a-zA-Z_]+ {
     yylval.string = strdup(yytext);

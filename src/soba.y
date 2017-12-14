@@ -2,21 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #define YYDEBUG 1
 
 #define VARSIZE 255
 
 typedef struct {
     char *name;
-    double value;
+    int value;
 } variable;
 
 int var_used = 0;
 variable var[VARSIZE];
 double get_value(char *name);
-int substitution(char *name, double value);
+int substitution(char *name, int value);
+char *to_string(int expr);
 
-%} 
+%}
 %union {
     int          int_value;
     double       double_value;
@@ -41,6 +43,10 @@ int substitution(char *name, double value);
   op_mult
   op_div
   op_mod
+  op_pleq
+  op_mieq
+  op_mueq
+  op_dieq
   op_eq
   op_eqeq
   op_neq
@@ -62,25 +68,27 @@ int substitution(char *name, double value);
 %%
 program
     :
-    | block LF          { printf("--> %d\n", $1); }
     | string LF         { printf("--> %s\n", $1); }
-    | program block LF  { printf("--> %d\n", $2); }
     | program string LF { printf("--> %s\n", $2); }
     ;
 string
     : STR               { $$ = $1; }
+    | VAR op_eq string  { $$ = $3; }
+    | block             { 
+            char *temp;
+            strcpy(temp, to_string($1));
+            $$ = temp; 
+        }
     ;
 block
     : expr              { $$ = $1; }
+    | block expr        { $$ = $2; }
     | if_stmt_num       { $$ = $1; }
     ;
 if_stmt_num
-    : IF expr op_colon block { if ( $2 != 0 ) $$ = $4;
-                          else $$ = 0; }
-    | block IF expr     { if ( $3 != 0 ) $$ = $3;
-                          else $$ = 0; }
+    : IF expr op_colon block { if ( $2 != 0 ) $$ = $4; else $$ = 0; }
+    | block IF expr     { if ( $3 != 0 ) $$ = $3; else $$ = 0; }
     ;
-
 expr
     : number                { $$ = $1; }
     | VAR op_eq expr        { substitution($1, $3); $$ = $3; }
@@ -118,11 +126,12 @@ int search_variable(char *name) {
     return -1;
 }
 
-int substitution(char *name, double value)
+int substitution(char *name, int value)
 {
     int i = search_variable(name);
     if ( i == -1 ) {
         var[var_used].name = strdup(name);
+        if ( isdigit(value) )
         var[var_used].value = value;
         var_used++;
     }
@@ -130,6 +139,14 @@ int substitution(char *name, double value)
     return 0;
 }
 
+char *to_string(int expr) {
+    char temp[255];
+    char *p;
+    snprintf(temp, 255, "%d", expr);
+    p = malloc(sizeof(char) * 255);
+    p = temp;
+    return p;
+}
 
 double get_value(char *name)
 {
@@ -153,7 +170,7 @@ int main(int argc, char* argv[])
     if ( argc < 2 ) { yyin = stdin; }
     else            { yyin = fopen(argv[1], "r"); }
 
-    do {
+do {
         if (yyparse()) {
             fprintf(stderr, "Error Occured!\n");
             exit(1);
