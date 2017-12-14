@@ -56,9 +56,9 @@ char *to_string(int expr);
   op_ge
   op_colon
   op_scolon
-%type <int_value> block expr number if_stmt_num
+%type <int_value> block expr number
 
-%type <string> string
+%type <string> string if_stmt
 %start program
 
 %left op_eqeq op_nep op_lt op_le op_gt op_ge
@@ -74,20 +74,16 @@ program
 string
     : STR               { $$ = $1; }
     | VAR op_eq string  { $$ = $3; }
-    | block             { 
-            char *temp;
-            strcpy(temp, to_string($1));
-            $$ = temp; 
-        }
+    | block             { $$ = to_string($1); }
     ;
 block
     : expr              { $$ = $1; }
     | block expr        { $$ = $2; }
-    | if_stmt_num       { $$ = $1; }
+    | if_stmt           { $$ = $1; }
     ;
-if_stmt_num
-    : IF expr op_colon block { if ( $2 != 0 ) $$ = $4; else $$ = 0; }
-    | block IF expr     { if ( $3 != 0 ) $$ = $3; else $$ = 0; }
+if_stmt
+    : IF expr op_colon string { if ( $2 != 0 ) $$ = $4; else $$ = 0; }
+    | string IF expr           { if ( $3 != 0 ) $$ = $1; else $$ = 0; }
     ;
 expr
     : number                { $$ = $1; }
@@ -104,7 +100,7 @@ expr
     | expr op_div expr      {
           if ( $3 != 0 ){ $$ = $1 / $3; }
           else {
-              fprintf(stderr, "Zero divide error!!\n"); 
+              fprintf(stderr, "Zero divide error!!\n");
               $$ = -1;
           }
       }
@@ -141,11 +137,8 @@ int substitution(char *name, int value)
 
 char *to_string(int expr) {
     char temp[255];
-    char *p;
     snprintf(temp, 255, "%d", expr);
-    p = malloc(sizeof(char) * 255);
-    p = temp;
-    return p;
+    return strdup(temp);
 }
 
 double get_value(char *name)
@@ -170,7 +163,7 @@ int main(int argc, char* argv[])
     if ( argc < 2 ) { yyin = stdin; }
     else            { yyin = fopen(argv[1], "r"); }
 
-do {
+    do {
         if (yyparse()) {
             fprintf(stderr, "Error Occured!\n");
             exit(1);
