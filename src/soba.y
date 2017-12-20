@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #define YYDEBUG 1
 
 #define VARSIZE 255
+
 
 typedef struct {
     char *name;
@@ -75,14 +75,14 @@ string
     : STR               { $$ = $1; }
     | VAR op_eq string  { $$ = $3; }
     | block             { $$ = to_string($1); }
+    | if_stmt           { $$ = $1; }
     ;
 block
     : expr              { $$ = $1; }
     | block expr        { $$ = $2; }
-    | if_stmt           { $$ = $1; }
     ;
 if_stmt
-    : IF expr op_colon string { if ( $2 != 0 ) $$ = $4; else $$ = 0; }
+    : IF expr op_colon string  { if ( $2 != 0 ) $$ = $4; else $$ = 0; }
     | string IF expr           { if ( $3 != 0 ) $$ = $1; else $$ = 0; }
     ;
 expr

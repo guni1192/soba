@@ -69,7 +69,7 @@ int yywrap(void) {
     return FLOAT;
 }
 
-[a-zA-Z_]+ {
+[a-zA-Z_][a-zA-Z0-9_]* {
     yylval.string = strdup(yytext);
     return(VAR);
 }
