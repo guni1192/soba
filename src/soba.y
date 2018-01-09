@@ -1,33 +1,34 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+
 #define YYDEBUG 1
+#define YYERROR_VERBOSE 1
 
-#define VARSIZE 255
-
-typedef struct {
-    char *name;
-    int value;
-} variable;
-
-int var_used = 0;
-variable var[VARSIZE]; int get_value(char *name);
-int substitution(char *name, int value);
-char *to_string(int expr);
+#include "soba.h"
+#include "node.h"
 
 %}
+
 %union {
-    int          int_value;
-    double       double_value;
-    char         *string;
+    node *nd;
+    soba_id id;
 }
 
 
-%token <int_value> INTEGER
-%token <double_value> FLOAT
-%token <string> VAR STR RANGE
+%type<nd> program compstmt
+%type<nd> stmt expr condition block cond var primary primary0
+%type<nd> stmts args opt_args opt_block f_args map map_args bparam
+%type<nd> opt_else opt_elsif
+%type<id> identifier
+
+%pure-parser
+%parse-param {parser_state *p}
+%lex-param {p}
+
+%{
+int yylex(YYSTYPE *lval, parser_state *p);
+static void yyerror(parser_state *p, const char *s);
+%}
+
 %token
   LF
   PRINT
@@ -65,52 +66,11 @@ char *to_string(int expr);
 %left op_mult op_div op_mod
 
 %%
-program
-    :
-    | string LF         { printf("--> %s\n", $1); }
-    | program string LF { printf("--> %s\n", $2); }
-    ;
-string
-    : STR               { $$ = $1; }
-    | block             { $$ = to_string($1); }
-    ;
-block
-    : expr              { $$ = $1; }
-    | block expr        { $$ = $2; }
-    | if_stmt           { $$ = $1; }
-    ;
-if_stmt
-    : IF expr op_colon string { if ( $2 != 0 ) $$ = $4; else $$ = 0; }
-    | string IF expr           { if ( $3 != 0 ) $$ = $1; else $$ = 0; }
-    ;
-expr
-    : number                { $$ = $1; }
-    | VAR op_eq expr        { substitution($1, $3); $$ = $3; }
-    | expr op_eqeq expr     { $$ = $1 == $3; }
-    | expr op_neq expr      { $$ = $1 != $3; }
-    | expr op_lt expr       { $$ = $1 < $3; }
-    | expr op_le expr       { $$ = $1 <= $3; }
-    | expr op_gt expr       { $$ = $1 > $3; }
-    | expr op_ge expr       { $$ = $1 >= $3; }
-    | expr op_plus expr     { $$ = $1 + $3; }
-    | expr op_minus expr    { $$ = $1 - $3; }
-    | expr op_mult expr     { $$ = $1 * $3; }
-    | expr op_div expr      {
-          if ( $3 != 0 ){ $$ = $1 / $3; }
-          else {
-              fprintf(stderr, "Zero divide error!!\n");
-              $$ = -1;
-          }
-      }
-    | expr op_mod expr     { $$ = $1 % $3; }
-    ;
-number
-    : INTEGER           { $$ = (double)$1; }
-    | FLOAT             { $$ = $1; }
-    | VAR               { $$ = get_value($1); }
-    | TRUE              { $$ = 1; }
-    | FALSE             { $$ = 0; }
-    ;
+program     : compstmt { p->lval = $1; }
+            ;
+compstmt    : stmts opt_terms
+            ;
+stmts       : { $$ = node_ }
 %%
 
 int search_variable(char *name) {
