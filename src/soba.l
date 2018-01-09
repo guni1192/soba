@@ -43,10 +43,10 @@ int yywrap(void) {
 [ \t]+ {}
 
 \".*\" {
-  yytext[strlen(yytext)-1] = '\0';
-  yytext = &yytext[1];
-  yylval.string = strdup(yytext);
-  return STR;
+    yytext[strlen(yytext)-1] = '\0';
+    yytext = &yytext[1];
+    yylval.string = strdup(yytext);
+    return STR;
 }
 
 [1-9][0-9]\.\.[1-9][0-9] {

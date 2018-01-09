@@ -13,8 +13,7 @@ typedef struct {
 } variable;
 
 int var_used = 0;
-variable var[VARSIZE];
-double get_value(char *name);
+variable var[VARSIZE]; int get_value(char *name);
 int substitution(char *name, int value);
 char *to_string(int expr);
 
@@ -73,7 +72,6 @@ program
     ;
 string
     : STR               { $$ = $1; }
-    | VAR op_eq string  { $$ = $3; }
     | block             { $$ = to_string($1); }
     ;
 block
@@ -141,12 +139,12 @@ char *to_string(int expr) {
     return strdup(temp);
 }
 
-double get_value(char *name)
+int get_value(char *name)
 {
     int i = search_variable(name);
     if ( i != -1 ) { return var[i].value; }
     printf("%s is not definded\n", name);
-    return 0.0;
+    return 0;
 }
 
 int yyerror(char const *str)
